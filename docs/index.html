@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sip-client — Lightweight Cross-Platform SIP Client in Rust with Audio Playback</title>
+  <meta name="description" content="Zero-bloat, cross-platform terminal & Win32 SIP client written in pure Rust. Automate dialing and stream WAV audio files over RTP.">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              400: '#38bdf8',
+              500: '#0284c7',
+              600: '#0369a1',
+            },
+            surface: {
+              950: '#080c14',
+              900: '#0e1422',
+              850: '#141c2e',
+              800: '#1b253d',
+              700: '#263454',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::selection { background: #0284c7; color: #ffffff; }
+    .glass-card {
+      background: rgba(14, 20, 34, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(56, 189, 248, 0.15);
+    }
+  </style>
+</head>
+<body class="bg-surface-950 text-slate-100 font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- Glow Background -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="absolute -top-40 left-1/4 w-96 h-96 bg-sky-600/15 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/2 -right-40 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
+  </div>
+
+  <div class="relative z-10 flex flex-col min-h-screen">
+
+    <!-- Top Navbar -->
+    <header class="border-b border-slate-800/80 bg-surface-950/80 backdrop-blur sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/20 text-white font-bold">
+            <i data-lucide="phone-call" class="w-5 h-5"></i>
+          </div>
+          <span class="font-bold text-xl tracking-tight text-white flex items-center">
+            sip<span class="text-sky-400">-client</span>
+          </span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono">v0.4.0</span>
+        </div>
+
+        <nav class="hidden md:flex items-center space-x-8 text-sm text-slate-300 font-medium">
+          <a href="#features" class="hover:text-sky-400 transition-colors">Features</a>
+          <a href="#demo" class="hover:text-sky-400 transition-colors">Interactive Demo</a>
+          <a href="#quickstart" class="hover:text-sky-400 transition-colors">Quickstart</a>
+          <a href="#commands" class="hover:text-sky-400 transition-colors">CLI Commands</a>
+        </nav>
+
+        <div class="flex items-center space-x-3">
+          <a href="https://crates.io/crates/sip-client" target="_blank" class="flex items-center space-x-2 text-xs font-semibold px-3 py-2 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 text-orange-300 border border-orange-500/30 transition-all">
+            <span>crates.io</span>
+          </a>
+          <a href="https://github.com/mahirgul/sip-client" target="_blank" class="flex items-center space-x-2 text-xs font-semibold px-4 py-2 rounded-lg bg-surface-800 hover:bg-surface-700 border border-slate-700 text-slate-200 transition-all">
+            <i data-lucide="github" class="w-4 h-4"></i>
+            <span>GitHub</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="pt-20 pb-16 px-4 sm:px-6 lg:px-8 text-center max-w-5xl mx-auto">
+      <div class="flex flex-wrap items-center justify-center gap-2 mb-6">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1.5"></i> MIT Licensed
+        </span>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-sky-500/10 text-sky-400 border border-sky-500/20">
+          <i data-lucide="monitor" class="w-3.5 h-3.5 mr-1.5"></i> Linux &amp; Windows Native
+        </span>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">
+          Automated Audio Broadcast
+        </span>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          Zero Bloat (100% Rust)
+        </span>
+      </div>
+
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white mb-6 leading-tight">
+        Lightweight Terminal &amp; Win32 <br><span class="bg-gradient-to-r from-sky-400 via-blue-400 to-teal-300 bg-clip-text text-transparent">SIP Client with Audio Playback</span>
+      </h1>
+      <p class="text-lg sm:text-xl text-slate-400 max-w-3xl mx-auto mb-10 leading-relaxed font-light">
+        A simple, fast, and dependency-free SIP client for automated dialing, notification alerts, and voice announcements. Automatically streams any WAV audio file over RTP as soon as the call is answered.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#quickstart" class="w-full sm:w-auto flex items-center justify-center px-6 py-3.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-surface-950 font-bold transition-all shadow-lg shadow-sky-500/25">
+          <i data-lucide="download" class="w-5 h-5 mr-2"></i> Install via Cargo
+        </a>
+        <a href="#demo" class="w-full sm:w-auto flex items-center justify-center px-6 py-3.5 rounded-lg bg-surface-850 hover:bg-surface-800 border border-slate-700 text-slate-200 font-semibold transition-all">
+          <i data-lucide="play" class="w-4 h-4 mr-2 text-sky-400"></i> Try Interactive Demo
+        </a>
+      </div>
+    </section>
+
+    <!-- Interactive Terminal Simulation -->
+    <section id="demo" class="py-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full">
+      <div class="text-center mb-6">
+        <h2 class="text-2xl font-bold text-white tracking-tight flex items-center justify-center">
+          <i data-lucide="terminal" class="w-6 h-6 mr-2 text-sky-400"></i> Interactive CLI Audio Broadcast Demo
+        </h2>
+        <p class="text-sm text-slate-400 mt-1">Select an automated calling scenario below to view real-time SIP signaling and RTP audio playback</p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap gap-2 justify-center mb-4">
+        <button onclick="runScenario('call_auto_hangup')" class="px-3.5 py-2 rounded-lg bg-surface-850 hover:bg-surface-700 border border-slate-700 text-xs font-mono text-sky-300 transition-colors">
+          1. Dial &amp; Play Audio (Auto-Hangup)
+        </button>
+        <button onclick="runScenario('listen')" class="px-3.5 py-2 rounded-lg bg-surface-850 hover:bg-surface-700 border border-slate-700 text-xs font-mono text-emerald-300 transition-colors">
+          2. Auto-Answer Inbound Server
+        </button>
+        <button onclick="runScenario('auth_call')" class="px-3.5 py-2 rounded-lg bg-surface-850 hover:bg-surface-700 border border-slate-700 text-xs font-mono text-purple-300 transition-colors">
+          3. Authenticated PBX Call
+        </button>
+      </div>
+
+      <!-- Terminal Window -->
+      <div class="rounded-xl overflow-hidden border border-slate-800 shadow-2xl bg-surface-900">
+        <div class="bg-surface-850 px-4 py-3 flex items-center justify-between border-b border-slate-800">
+          <div class="flex items-center space-x-2">
+            <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-yellow-500/80 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-green-500/80 inline-block"></span>
+            <span class="text-xs font-mono text-slate-400 ml-3">sip-client v0.4.0</span>
+          </div>
+          <span class="text-xs text-sky-400 font-mono">Cross-Platform Terminal &amp; Win32</span>
+        </div>
+
+        <div class="p-6 font-mono text-xs sm:text-sm bg-surface-950 text-slate-300 min-h-[250px]" id="simOutput">
+          <div class="text-sky-400">$ sip-client call sip:1000@192.168.1.50 --play announcement.wav --hangup</div>
+          <div class="text-slate-400 mt-1">[Audio] Loaded WAV audio file: "announcement.wav" (32000 samples, 200 RTP frames, 4.00s duration)</div>
+          <div class="text-slate-300">[SIP] Calling sip:1000@192.168.1.50 via 192.168.1.50:5060</div>
+          <div class="text-slate-400">[SIP] Sent INVITE (Attempt #1, CSeq: 1)</div>
+          <div class="text-yellow-400 mt-1">[SIP] Received: 180 (SIP/2.0 180 Ringing)</div>
+          <div class="text-yellow-400">[SIP] Call is Ringing...</div>
+          <div class="text-emerald-400 font-bold mt-1">[SIP] Received: 200 (SIP/2.0 200 OK)</div>
+          <div class="text-emerald-400 font-bold">[SIP] *** CALL ESTABLISHED *** (Remote RTP Audio: 192.168.1.50:10004)</div>
+          <div class="text-sky-300">[SIP] Sent ACK. Streaming audio now...</div>
+          <div class="text-slate-400 mt-1">[RTP Streamer]: Sending 20ms G.711u packets (160 bytes/packet)...</div>
+          <div class="text-slate-300">[Audio] WAV audio playback completed. Automatically hanging up (--hangup)...</div>
+          <div class="text-slate-400">[SIP] Terminating call. Sending BYE...</div>
+          <div class="text-white font-bold mt-1">[SIP] Call closed successfully.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section id="features" class="py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-extrabold text-white">Why Use sip-client?</h2>
+        <p class="text-slate-400 mt-2">Built for lightweight automation without the bloat of full softphone GUIs</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-card p-6 rounded-xl">
+          <div class="w-10 h-10 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center mb-4">
+            <i data-lucide="music" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Automated Audio Playback</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Attach any standard <code class="text-sky-300 font-mono">.wav</code> file. Once the remote party answers, audio streams seamlessly over RTP using standard G.711 $\mu$-law/A-law.
+          </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl">
+          <div class="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center mb-4">
+            <i data-lucide="phone-forwarded" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Auto-Hangup Support</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Specify <code class="text-sky-300 font-mono">--hangup</code> to immediately send a <code class="text-sky-300 font-mono">BYE</code> and exit cleanly once your announcement file completes. Perfect for automated notification alerts.
+          </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl">
+          <div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-4">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Digest Authentication (MD5)</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Securely register and dial through Asterisk, FreePBX, Kamailio, OpenSIPS, and commercial cloud VoIP providers using standard HTTP Digest Auth.
+          </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl">
+          <div class="w-10 h-10 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center mb-4">
+            <i data-lucide="radio" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Inbound Auto-Answer Mode</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Use <code class="text-sky-300 font-mono">sip-client listen</code> to act as an automated announcement server or test audio loopback responder on port 5060.
+          </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl">
+          <div class="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-4">
+            <i data-lucide="monitor" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Win32 Native Integration</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Runs natively in Windows PowerShell, CMD, or as a Win32 console app with native dialog notifications (<code class="text-sky-300 font-mono">--win32</code>).
+          </p>
+        </div>
+
+        <div class="glass-card p-6 rounded-xl">
+          <div class="w-10 h-10 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center mb-4">
+            <i data-lucide="file-audio" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Built-in Test WAV Generator</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Need audio to test immediately? Run <code class="text-sky-300 font-mono">sip-client gen-wav test.wav</code> to generate a clean 8kHz sine audio file in seconds.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quickstart -->
+    <section id="quickstart" class="py-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-extrabold text-white">Installation &amp; Usage</h2>
+        <p class="text-slate-400 mt-2">Install directly from crates.io with one command</p>
+      </div>
+
+      <div class="space-y-4 font-mono text-sm">
+        <div class="bg-surface-900 border border-slate-800 rounded-lg p-4">
+          <div class="text-xs text-slate-500 font-sans mb-1">Install from crates.io:</div>
+          <div class="flex items-center justify-between text-sky-300">
+            <code>cargo install sip-client</code>
+            <button onclick="copyCode('cargo install sip-client')" class="text-slate-400 hover:text-white" title="Copy">
+              <i data-lucide="copy" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-surface-900 border border-slate-800 rounded-lg p-4">
+          <div class="text-xs text-slate-500 font-sans mb-1">Dial and play an audio message:</div>
+          <div class="flex items-center justify-between text-sky-300">
+            <code>sip-client call sip:1000@192.168.1.1 --play alert.wav --hangup</code>
+            <button onclick="copyCode('sip-client call sip:1000@192.168.1.1 --play alert.wav --hangup')" class="text-slate-400 hover:text-white" title="Copy">
+              <i data-lucide="copy" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-slate-800/80 bg-surface-950 py-10 px-4 sm:px-6 lg:px-8 text-center text-sm text-slate-500">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center space-x-2">
+          <span class="font-bold text-white">sip-client</span>
+          <span>— Lightweight SIP client by Mahir Gül.</span>
+        </div>
+        <div class="flex items-center space-x-6 text-xs">
+          <span>Licensed under <a href="https://opensource.org/licenses/MIT" target="_blank" class="text-sky-400 hover:underline">MIT</a></span>
+          <a href="https://crates.io/crates/sip-client" class="text-orange-400 hover:underline">crates.io</a>
+          <a href="https://github.com/mahirgul/sip-client" class="text-slate-400 hover:text-white flex items-center">
+            <i data-lucide="github" class="w-4 h-4 mr-1"></i> GitHub Repository
+          </a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    const scenarios = {
+      call_auto_hangup: `<div class="text-sky-400">$ sip-client call sip:1000@192.168.1.50 --play announcement.wav --hangup</div>
+<div class="text-slate-400 mt-1">[Audio] Loaded WAV audio file: "announcement.wav" (32000 samples, 200 RTP frames, 4.00s duration)</div>
+<div class="text-slate-300">[SIP] Calling sip:1000@192.168.1.50 via 192.168.1.50:5060</div>
+<div class="text-slate-400">[SIP] Sent INVITE (Attempt #1, CSeq: 1)</div>
+<div class="text-yellow-400 mt-1">[SIP] Received: 180 (SIP/2.0 180 Ringing)</div>
+<div class="text-yellow-400">[SIP] Call is Ringing...</div>
+<div class="text-emerald-400 font-bold mt-1">[SIP] Received: 200 (SIP/2.0 200 OK)</div>
+<div class="text-emerald-400 font-bold">[SIP] *** CALL ESTABLISHED *** (Remote RTP Audio: 192.168.1.50:10004)</div>
+<div class="text-sky-300">[SIP] Sent ACK. Streaming audio now...</div>
+<div class="text-slate-400 mt-1">[RTP Streamer]: Sending 20ms G.711u packets (160 bytes/packet)...</div>
+<div class="text-slate-300">[Audio] WAV audio playback completed. Automatically hanging up (--hangup)...</div>
+<div class="text-slate-400">[SIP] Terminating call. Sending BYE...</div>
+<div class="text-white font-bold mt-1">[SIP] Call closed successfully.</div>`,
+
+      listen: `<div class="text-sky-400">$ sip-client listen --bind 0.0.0.0:5060 --play welcome.wav --loop</div>
+<div class="text-slate-400 mt-1">[SIP] Listening for incoming calls on 0.0.0.0:5060 (Local IP: 192.168.1.10)...</div>
+<div class="text-sky-300 mt-2">[SIP] Incoming call from 192.168.1.80:5060!</div>
+<div class="text-emerald-400 font-bold">[SIP] Answered with 200 OK. Streaming audio...</div>
+<div class="text-slate-300">[RTP Streamer]: Streaming welcome.wav continuously in loop mode to 192.168.1.80:12344</div>`,
+
+      auth_call: `<div class="text-sky-400">$ sip-client call sip:200@pbx.domain.com --user 101 --password secret --play message.wav</div>
+<div class="text-slate-300">[SIP] Calling sip:200@pbx.domain.com via 10.0.0.1:5060</div>
+<div class="text-slate-400">[SIP] Sent INVITE (Attempt #1, CSeq: 1)</div>
+<div class="text-yellow-400 mt-1">[SIP] Received: 401 (SIP/2.0 401 Unauthorized)</div>
+<div class="text-sky-300">[SIP] Challenged with Digest Auth for realm "asterisk"</div>
+<div class="text-slate-400">[SIP] Sent INVITE with MD5 Digest Authorization (Attempt #2, CSeq: 2)</div>
+<div class="text-emerald-400 font-bold mt-1">[SIP] Received: 200 OK! Call Accepted</div>
+<div class="text-emerald-400 font-bold">[SIP] *** CALL ESTABLISHED *** Streaming audio message.wav...</div>`
+    };
+
+    function runScenario(key) {
+      document.getElementById('simOutput').innerHTML = scenarios[key];
+    }
+
+    function copyCode(text) {
+      navigator.clipboard.writeText(text);
+      alert('Copied to clipboard: ' + text);
+    }
+  </script>
+</body>
+</html>
