@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+
+PackageIdentifier: MahirGul.sip-client
+PackageVersion: 3.0.0
+InstallerType: portable
+Commands:
+- sip-client
+ReleaseDate: 2026-10-14
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/mahirgul/sip-client/releases/download/v3.0.0/sip-client-windows-x86_64.exe
+  InstallerSha256: 030077BB6F4F255DA022562E414F37C6D37468F32B84EE9B0F98686C7C88EE31
+ManifestType: installer
+ManifestVersion: 1.12.0

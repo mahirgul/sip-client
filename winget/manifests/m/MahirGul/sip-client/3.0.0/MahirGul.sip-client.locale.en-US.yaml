@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MahirGul.sip-client
+PackageVersion: 3.0.0
+PackageLocale: en-US
+Publisher: Mahir Gül
+PublisherUrl: https://github.com/mahirgul
+PublisherSupportUrl: https://github.com/mahirgul/sip-client/issues
+PackageName: sip-client
+PackageUrl: https://github.com/mahirgul/sip-client
+License: MIT
+LicenseUrl: https://github.com/mahirgul/sip-client/blob/main/LICENSE
+ShortDescription: Minimalist cross-platform SIP softphone client with automated audio playback
+Description: |-
+  sip-client is a lightweight, zero-bloat cross-platform SIP client written in Rust.
+  It works seamlessly on Windows (native Win32 console/terminal) and Linux.
+  Features include RFC 3261 SIP signaling over UDP, digest MD5 authentication,
+  and automated WAV audio streaming over standard RTP (PCMU/G.711u) upon call answer.
+Moniker: sip-client
+Tags:
+- sip
+- sip-client
+- voip
+- rtp
+- audio
+- softphone
+- rust
+- cli
+ReleaseNotes: 'v3.0.0: Lightweight, zero-bloat cross-platform SIP client with automated audio playback over RTP.'
+ReleaseNotesUrl: https://github.com/mahirgul/sip-client/releases/tag/v3.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
