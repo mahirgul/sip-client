@@ -1,6 +1,6 @@
 [package]
 name = "sip-client"
-version = "0.4.0"
+version = "3.0.0"
 edition = "2024"
 authors = ["Mahir Gül <mahirgul@gmail.com>"]
 description = "Lightweight, cross-platform terminal & Win32 SIP client in Rust with automated audio playback and RTP streaming"

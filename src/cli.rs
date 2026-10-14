@@ -7,7 +7,7 @@ use clap::{Parser, Subcommand};
 #[command(
     name = "sip-client",
     author = "Mahir Gül <mahirgul@gmail.com>",
-    version = "0.4.0",
+    version = "3.0.0",
     about = "Lightweight cross-platform terminal & Win32 SIP client with automated audio playback and RTP streaming",
     long_about = "A simple, clean, lightweight SIP client in 100% Rust. Place calls or answer incoming calls from the terminal or Win32, and automatically stream WAV audio files over RTP (G.711u/a)."
 )]

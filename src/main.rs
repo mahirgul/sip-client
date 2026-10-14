@@ -42,7 +42,7 @@ fn main() -> Result<()> {
             bind,
             win32,
         } => {
-            println!("=== sip-client v0.4.0 ===");
+            println!("=== sip-client v3.0.0 ===");
             let config = SipClientConfig {
                 destination: destination.clone(),
                 caller_id: user,
@@ -72,7 +72,7 @@ fn main() -> Result<()> {
             play,
             loop_audio,
         } => {
-            println!("=== sip-client v0.4.0 (Inbound Listener) ===");
+            println!("=== sip-client v3.0.0 (Inbound Listener) ===");
             SipClient::listen(&bind, play, loop_audio, running)?;
         }
 
