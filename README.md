@@ -106,3 +106,12 @@ Commands:
 ## 📄 License
 
 Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
+
+---
+
+## ☁️ Cloud Infrastructure Partner
+
+[![UpCloud](https://img.shields.io/badge/UpCloud-$250_Free_Credit-7b1fa2?style=flat&logo=cloud&logoColor=white)](https://signup.upcloud.com/?promo=affiliate-aipbx250&amp;utm_source=aipbx&amp;utm_medium=affiliate&amp;utm_campaign=affiliate-aipbx250)
+
+Deploy VoIP PBXs, Asterisk systems, or Rust microservices on [UpCloud](https://signup.upcloud.com/?promo=affiliate-aipbx250&amp;utm_source=aipbx&amp;utm_medium=affiliate&amp;utm_campaign=affiliate-aipbx250) with high-speed MaxIOPS storage. Get **$250 in free cloud credits** with promo code `affiliate-aipbx250`.
+
